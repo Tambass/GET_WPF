@@ -13,6 +13,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using System.Data;
+using MySql.Data.MySqlClient;
+using System.Configuration;
+
 namespace GET_WPF
 {
     /// <summary>
@@ -20,6 +24,7 @@ namespace GET_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        MySqlConnection connection = new MySqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
         public MainWindow()
         {
             InitializeComponent();
@@ -27,7 +32,24 @@ namespace GET_WPF
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                // 1. DataBinding - Propriétié d'Object métier
+                connection.Open();
+                MySqlCommand cmd = new MySqlCommand("Select * from Admin", connection);
+                // Définit une instruction SQL ou une procédure stockée utilisée pour sélectionner des enregistrements dans la source de données.
+                MySqlDataAdapter adp = new MySqlDataAdapter(cmd);
+                DataSet ds = new DataSet(); // Représente un cache en mémoire des données.
 
+                adp.Fill(ds, "LoadDataBinding"); // Remplis le cache mémoire, Collection qui est utilisée pour générer le contenu de ItemSource
+                dataGridUser.DataContext = ds;
+
+                connection.Close();
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }
